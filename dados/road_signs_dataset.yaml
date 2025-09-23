@@ -1,0 +1,8 @@
+names:
+- speedlimit
+- crosswalk
+- trafficlight
+- stop
+nc: 4
+train: ../dataset/train/images
+val: ../dataset/val/images
