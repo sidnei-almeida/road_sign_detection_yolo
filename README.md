@@ -70,9 +70,26 @@ road_sign_detection_yolo/
 
 ---
 
+## 📷 Exemplos e Artefatos (links diretos)
+- Dataset YAML: [`dados/road_signs_dataset.yaml`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/road_signs_dataset.yaml)
+- Anotações CSV: [`dados/road_signs_annotations.csv`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/road_signs_annotations.csv)
+- Artefatos de treino:
+  - [`results.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/results.png)
+  - [`confusion_matrix.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/confusion_matrix.png)
+  - [`confusion_matrix_normalized.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/confusion_matrix_normalized.png)
+  - [`labels.jpg`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/labels.jpg)
+  - [`results.csv`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/results.csv)
+- Pesos do modelo (arquivo grande):
+  - [`modelos/best.pt`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/modelos/best.pt)
+  - [`resultados/runs/detect/train/weights/best.pt`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/weights/best.pt)
+- Exemplos (substitua pelo nome real que estiver em `dados/image_examples/`):
+  - `https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/image_examples/road0.jpg`
+
+---
+
 ## 📈 App – Páginas
 - **Início**: status do sistema, resumo de classes e mAP, destaques do treino
-- **Detecção**: upload | câmera | exemplos, sliders de confiança e IoU
+- **Detecção**: upload | câmera | exemplos | lote; presets de inferência; filtros por classe; download da imagem anotada
 - **Treinamento**: gráficos interativos a partir do `results.csv` + imagens principais
 - **Dados**: visualização do YAML do dataset e amostra de anotações
 - **Sobre**: informações do projeto e contato
