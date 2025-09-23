@@ -85,6 +85,25 @@ CLASS_COLORS = {
     "Crosswalk": (82, 196, 26),
 }
 
+CANON_MAP = {
+    "traffic light": "Traffic Light",
+    "traffic-light": "Traffic Light",
+    "semaphore": "Traffic Light",
+    "signal light": "Traffic Light",
+    "stop": "Stop",
+    "stop sign": "Stop",
+    "speedlimit": "Speedlimit",
+    "speed limit": "Speedlimit",
+    "speed-limit": "Speedlimit",
+    "crosswalk": "Crosswalk",
+    "pedestrian crossing": "Crosswalk",
+    "zebra crossing": "Crosswalk",
+}
+
+def to_canonical(name: str) -> str:
+    key = (name or "").strip().lower()
+    return CANON_MAP.get(key, name if name in ALLOWED_CLASSES else name.title())
+
 @st.cache_resource(show_spinner=False)
 def load_model() -> YOLO | None:
     candidate_paths = [
@@ -272,20 +291,25 @@ def _gather_example_images():
     return fallback[:12]
 
 
-def _draw_boxes(image_np: np.ndarray, boxes_xyxy: np.ndarray, classes: np.ndarray, confs: np.ndarray, names: dict, include: list[str]) -> np.ndarray:
+def _draw_boxes(image_np: np.ndarray, boxes_xyxy: np.ndarray, classes: np.ndarray, confs: np.ndarray, names: dict, include: list[str]) -> tuple[np.ndarray, int]:
     out = image_np.copy()
+    drawn = 0
+    include_set = set(include or [])
     for i in range(len(classes)):
-        name = names.get(int(classes[i]), str(int(classes[i])))
-        if name not in include:
+        raw = names.get(int(classes[i]), str(int(classes[i])))
+        canon = to_canonical(raw)
+        # Se filtro estiver vazio, ou se o rótulo canônico estiver selecionado, desenha
+        if include_set and canon not in include_set:
             continue
         x1, y1, x2, y2 = boxes_xyxy[i].astype(int)
-        color = CLASS_COLORS.get(name, (0, 194, 255))
+        color = CLASS_COLORS.get(canon, (0, 194, 255))
         cv2.rectangle(out, (x1, y1), (x2, y2), color, 2)
-        label = f"{name} {confs[i]:.2f}"
+        label = f"{canon} {confs[i]:.2f}"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         cv2.rectangle(out, (x1, max(0, y1 - th - 6)), (x1 + tw + 6, y1), color, -1)
         cv2.putText(out, label, (x1 + 3, y1 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (15, 15, 15), 1, cv2.LINE_AA)
-    return out
+        drawn += 1
+    return out, drawn
 
 
 def page_detect(model):
@@ -341,7 +365,12 @@ def page_detect(model):
             confs = r0.boxes.conf.cpu().numpy() if r0.boxes is not None else np.empty((0,))
 
             img_np = np.array(pil_img.convert("RGB"))
-            annotated = _draw_boxes(img_np, xyxy, cls, confs, names, selected_classes)
+            annotated, drawn = _draw_boxes(img_np, xyxy, cls, confs, names, selected_classes)
+            # Fallback: se houve detecções mas nenhuma casou com os filtros/nomes, desenhar todas
+            if r0.boxes is not None and len(r0.boxes) > 0 and drawn == 0:
+                annotated, _ = _draw_boxes(img_np, xyxy, cls, confs, names, include=[])
+                st.caption("Nenhuma detecção correspondeu ao filtro/nomes esperados. Exibindo todas as classes retornadas pelo modelo.")
+
             st.image(annotated, caption=f"Detecções ({latency:.1f} ms)", use_container_width=True)
 
             # Botão de download da imagem anotada
