@@ -18,9 +18,17 @@ import av
 import cv2
 from streamlit_image_select import image_select
 import torch
+import tempfile
+import requests
 
 # Base do app para construir caminhos robustos
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WEIGHTS_DIR = os.path.join(BASE_DIR, "modelos")
+DEFAULT_MODEL_URLS = [
+    # User-owned repo raw URLs (ajuste se necessário)
+    "https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/modelos/best.pt",
+    "https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/weights/best.pt",
+]
 
 st.set_page_config(
     page_title="Road Sign Detection • YOLO",
@@ -106,19 +114,46 @@ def to_canonical(name: str) -> str:
 
 @st.cache_resource(show_spinner=False)
 def load_model() -> YOLO | None:
+    # 1) Tenta pesos locais
     candidate_paths = [
-        os.path.join(BASE_DIR, "modelos", "best.pt"),
+        os.path.join(WEIGHTS_DIR, "best.pt"),
         os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "best.pt"),
-        os.path.join(BASE_DIR, "modelos", "last.pt"),
+        os.path.join(WEIGHTS_DIR, "last.pt"),
         os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "last.pt"),
     ]
     for path in candidate_paths:
-        if os.path.exists(path):
+        if os.path.exists(path) and os.path.getsize(path) > 0:
             try:
                 return YOLO(path)
             except Exception as e:
                 st.warning(f"Falha ao carregar modelo em {path}: {e}")
-    st.error("Nenhum arquivo de pesos YOLO encontrado. Coloque 'best.pt' em 'modelos/'.")
+
+    # 2) Se não achar, tenta baixar via MODEL_URL ou URLs padrão
+    urls = []
+    env_url = os.getenv("MODEL_URL") or st.secrets.get("MODEL_URL", None)
+    if env_url:
+        urls.append(env_url)
+    urls.extend(DEFAULT_MODEL_URLS)
+
+    os.makedirs(WEIGHTS_DIR, exist_ok=True)
+    target_path = os.path.join(WEIGHTS_DIR, "best.pt")
+
+    for url in urls:
+        try:
+            with st.spinner(f"Baixando pesos do modelo...\n{url}"):
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+                with open(target_path, "wb") as f:
+                    f.write(r.content)
+            if os.path.getsize(target_path) < 1_000_000:  # sanity check 1MB
+                st.warning("Arquivo de pesos baixado é muito pequeno; tentando próxima fonte...")
+                continue
+            st.success("Pesos baixados com sucesso.")
+            return YOLO(target_path)
+        except Exception as e:
+            st.warning(f"Falha ao baixar de {url}: {e}")
+
+    st.error("Não foi possível localizar ou baixar os pesos YOLO. Configure MODEL_URL ou coloque 'best.pt' em 'modelos/'.")
     return None
 
 @st.cache_data(show_spinner=False)
@@ -317,6 +352,25 @@ def page_detect(model):
     st.markdown("Faça upload, use a câmera ou selecione um exemplo.")
 
     st.info("Este modelo detecta apenas: Traffic Light, Stop, Speedlimit, Crosswalk.")
+
+    with st.expander("Diagnóstico de Inferência", expanded=False):
+        if model is not None:
+            try:
+                names = getattr(model.model, "names", None) or getattr(model, "names", None)
+                st.markdown("**Classes do modelo (names):**")
+                st.code(str(names))
+            except Exception as e:
+                st.write(f"Erro ao acessar names: {e}")
+        weight_candidates = [
+            os.path.join(WEIGHTS_DIR, "best.pt"),
+            os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "best.pt"),
+            os.path.join(WEIGHTS_DIR, "last.pt"),
+            os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "last.pt"),
+        ]
+        sizes = {p: (os.path.exists(p) and os.path.getsize(p)) for p in weight_candidates}
+        st.markdown("**Arquivos de peso e tamanhos (bytes):**")
+        st.code(str(sizes))
+        st.caption("Se nenhum arquivo existir ou os tamanhos forem muito pequenos, configure a variável MODEL_URL nas secrets/env para baixar os pesos.")
 
     # Presets
     cols_p = st.columns(3)
