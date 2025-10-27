@@ -1,70 +1,70 @@
-# 🚦 App de Detecção de Placas de Trânsito
+# 🚦 Road Sign Detection App
 
-Aplicativo Streamlit profissional para detecção de placas de trânsito em tempo real usando YOLOv8.
+Professional Streamlit application for real-time road sign detection using YOLOv8.
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- **Detecção em Tempo Real**: Upload de imagens e detecção instantânea de placas
-- **4 Classes de Sinais**: Limite de velocidade, faixa de pedestres, semáforo e placa de parada
-- **Interface Interativa**: Ajuste de limiar de confiança e visualização de resultados
-- **Análise do Modelo**: Gráficos interativos de treinamento e métricas de performance
-- **Design Profissional**: Interface moderna e responsiva
+- **Real-Time Detection**: Upload images and instant road sign detection
+- **4 Sign Classes**: Speed limit, crosswalk, traffic light, and stop sign
+- **Interactive Interface**: Adjust confidence threshold and visualize results
+- **Model Analysis**: Interactive training graphs and performance metrics
+- **Professional Design**: Modern and responsive interface
 
-## 📦 Instalação
+## 📦 Installation
 
-1. **Clone o repositório**:
+1. **Clone the repository**:
 ```bash
 git clone <repository-url>
 cd road_sign_detection_yolo
 ```
 
-2. **Instale as dependências**:
+2. **Install dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Execute o aplicativo**:
+3. **Run the application**:
 ```bash
 streamlit run app.py
 ```
 
-## 🎯 Como Usar
+## 🎯 How to Use
 
-1. **Acesse a aba "Detecção"**
-2. **Faça upload de uma imagem** com placas de trânsito
-3. **Ajuste o limiar de confiança** na barra lateral (opcional)
-4. **Clique em "Detectar Placas"**
-5. **Visualize os resultados** com bounding boxes e confiança
+1. **Go to the "Detection" tab**
+2. **Upload an image** with road signs
+3. **Adjust the confidence threshold** in the sidebar (optional)
+4. **Click "Detect Signs"**
+5. **View the results** with bounding boxes and confidence
 
-## 📊 Abas Disponíveis
+## 📊 Available Tabs
 
-### 🔍 Detecção
-- Upload e processamento de imagens
-- Visualização de resultados com bounding boxes
-- Tabela de detecções com confiança
+### 🔍 Detection
+- Image upload and processing
+- Result visualization with bounding boxes
+- Detection table with confidence
 
-### 📊 Análise do Modelo
-- Métricas finais de performance
-- Informações sobre as classes detectadas
-- Estatísticas do modelo
+### 📊 Model Analysis
+- Final performance metrics
+- Information about detected classes
+- Model statistics
 
-### 📈 Treinamento
-- Gráficos interativos de métricas
-- Curvas de loss durante o treinamento
-- Estatísticas detalhadas do processo
+### 📈 Training
+- Interactive metric graphs
+- Loss curves during training
+- Detailed statistics of the process
 
-### ℹ️ Sobre
-- Informações do projeto
-- Tecnologias utilizadas
-- Performance do modelo
+### ℹ️ About
+- Project information
+- Technologies used
+- Model performance
 
-## 🛠️ Tecnologias
+## 🛠️ Technologies
 
 - **Frontend**: Streamlit
 - **ML**: YOLOv8 (Ultralytics)
-- **Visualização**: Plotly
-- **Processamento**: OpenCV, PIL
-- **Dados**: Pandas, NumPy
+- **Visualization**: Plotly
+- **Processing**: OpenCV, PIL
+- **Data**: Pandas, NumPy
 
 ## 📈 Performance
 
@@ -73,23 +73,23 @@ streamlit run app.py
 - **Precision**: ~94%
 - **Recall**: ~88%
 
-## 🎨 Características da Interface
+## 🎨 Interface Features
 
-- Design responsivo e moderno
-- Cores profissionais (azul e gradientes)
-- Gráficos interativos com Plotly
-- Feedback visual em tempo real
-- Sidebar com configurações
-- Sistema de abas organizado
+- Responsive and modern design
+- Professional colors (blue and gradients)
+- Interactive charts with Plotly
+- Real-time visual feedback
+- Sidebar with settings
+- Organized tab system
 
-## 🔧 Configurações
+## 🔧 Settings
 
-- **Limiar de Confiança**: 0.1 - 1.0 (padrão: 0.5)
-- **Formatos Suportados**: PNG, JPG, JPEG
-- **Resolução**: Automática (otimizada para 640x640)
+- **Confidence Threshold**: 0.1 - 1.0 (default: 0.5)
+- **Supported Formats**: PNG, JPG, JPEG
+- **Resolution**: Automatic (optimized for 640x640)
 
-## 📝 Notas
+## 📝 Notes
 
-- O modelo deve estar na pasta `modelos/best.pt`
-- Os dados de treinamento devem estar em `resultados/runs/detect/train/results.csv`
-- A configuração do dataset deve estar em `dados/road_signs_dataset.yaml`
+- The model must be in the `modelos/best.pt` folder
+- Training data must be in `resultados/runs/detect/train/results.csv`
+- Dataset configuration must be in `dados/road_signs_dataset.yaml`

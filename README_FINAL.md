@@ -1,80 +1,80 @@
-# 🚦 App de Detecção de Placas de Trânsito - YOLOv8
+# 🚦 Road Sign Detection App - YOLOv8
 
-Aplicativo Streamlit profissional para detecção de placas de trânsito em tempo real usando YOLOv8.
+Professional Streamlit application for real-time road sign detection using YOLOv8.
 
-## 🎯 Visão Geral
+## 🎯 Overview
 
-Este projeto implementa um sistema completo de detecção de placas de trânsito com:
-- **4 Classes**: Limite de velocidade, faixa de pedestres, semáforo e placa de parada
-- **Modelo YOLOv8**: Arquitetura nano otimizada para velocidade
-- **Interface Profissional**: Design moderno e responsivo
-- **Análise Completa**: Gráficos interativos de treinamento e métricas
+This project implements a complete road sign detection system with:
+- **4 Classes**: Speed limit, crosswalk, traffic light, and stop sign
+- **YOLOv8 Model**: Nano architecture optimized for speed
+- **Professional Interface**: Modern and responsive design
+- **Complete Analysis**: Interactive training graphs and metrics
 
-## 🚀 Instalação e Execução
+## 🚀 Installation and Execution
 
-### Opção 1: Execução Rápida
+### Option 1: Quick Execution
 ```bash
-# Clone o repositório
+# Clone the repository
 git clone <repository-url>
 cd road_sign_detection_yolo
 
-# Execute o script automático
+# Run the automatic script
 ./run_app.sh
 ```
 
-### Opção 2: Instalação Manual
+### Option 2: Manual Installation
 ```bash
-# 1. Crie ambiente virtual
+# 1. Create virtual environment
 python -m venv venv
 source venv/bin/activate
 
-# 2. Instale dependências
+# 2. Install dependencies
 pip install -r requirements_lite.txt
 
-# 3. Execute o app
+# 3. Run the app
 streamlit run app_lite.py
 ```
 
-## 📱 Funcionalidades
+## 📱 Features
 
-### 🔍 Detecção de Imagens
-- Upload de imagens (PNG, JPG, JPEG)
-- Detecção em tempo real com bounding boxes
-- Ajuste de limiar de confiança
-- Tabela de resultados com confiança
+### 🔍 Image Detection
+- Image upload (PNG, JPG, JPEG)
+- Real-time detection with bounding boxes
+- Confidence threshold adjustment
+- Results table with confidence
 
-### 📊 Análise do Modelo
-- Métricas de performance em tempo real
-- Informações detalhadas das classes
-- Estatísticas do dataset
+### 📊 Model Analysis
+- Real-time performance metrics
+- Detailed class information
+- Dataset statistics
 
-### 📈 Visualização de Treinamento
-- Gráficos interativos com Plotly
-- Curvas de métricas (Precision, Recall, mAP)
-- Análise de loss functions
-- Estatísticas detalhadas do processo
+### 📈 Training Visualization
+- Interactive charts with Plotly
+- Metric curves (Precision, Recall, mAP)
+- Loss function analysis
+- Detailed process statistics
 
-### ℹ️ Documentação
-- Informações completas do projeto
-- Tecnologias utilizadas
-- Performance do modelo
+### ℹ️ Documentation
+- Complete project information
+- Technologies used
+- Model performance
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
 ```
 road_sign_detection_yolo/
-├── app.py                    # App completo com YOLO
-├── app_lite.py              # App demo (sem YOLO)
-├── requirements.txt         # Dependências completas
-├── requirements_lite.txt    # Dependências mínimas
-├── run_app.sh              # Script de execução
-├── demo.py                 # Verificação de dependências
+├── app.py                    # Complete app with YOLO
+├── app_lite.py              # Demo app (without YOLO)
+├── requirements.txt         # Complete dependencies
+├── requirements_lite.txt    # Minimum dependencies
+├── run_app.sh              # Execution script
+├── demo.py                 # Dependency verification
 ├── dados/
 │   ├── road_signs_annotations.csv
 │   └── road_signs_dataset.yaml
 ├── dataset/
-│   ├── train/ (701 imagens)
-│   └── val/ (176 imagens)
+│   ├── train/ (701 images)
+│   └── val/ (176 images)
 ├── modelos/
 │   ├── best.pt
 │   └── last.pt
@@ -88,14 +88,14 @@ road_sign_detection_yolo/
 
 ## 📊 Dataset
 
-- **Total**: 1.244 anotações de sinais
-- **Treino**: 701 imagens (984 anotações)
-- **Validação**: 176 imagens (260 anotações)
+- **Total**: 1,244 sign annotations
+- **Training**: 701 images (984 annotations)
+- **Validation**: 176 images (260 annotations)
 - **Classes**:
-  - 🚦 Limite de Velocidade: 783 anotações
-  - 🚶 Faixa de Pedestres: 200 anotações
-  - 🔴 Semáforo: 170 anotações
-  - 🛑 Placa de Parada: 91 anotações
+  - 🚦 Speed Limit: 783 annotations
+  - 🚶 Crosswalk: 200 annotations
+  - 🔴 Traffic Light: 170 annotations
+  - 🛑 Stop Sign: 91 annotations
 
 ## 📈 Performance
 
@@ -104,97 +104,97 @@ road_sign_detection_yolo/
 - **Precision**: ~94%
 - **Recall**: ~88%
 
-## 🛠️ Tecnologias
+## 🛠️ Technologies
 
 ### Backend
 - **Python 3.13**
-- **Streamlit** - Interface web
-- **OpenCV** - Processamento de imagens
-- **PIL/Pillow** - Manipulação de imagens
+- **Streamlit** - Web interface
+- **OpenCV** - Image processing
+- **PIL/Pillow** - Image manipulation
 
 ### Machine Learning
-- **YOLOv8** - Detecção de objetos
-- **Ultralytics** - Framework YOLO
-- **PyTorch** - Backend ML (opcional)
+- **YOLOv8** - Object detection
+- **Ultralytics** - YOLO framework
+- **PyTorch** - ML backend (optional)
 
-### Visualização
-- **Plotly** - Gráficos interativos
-- **Pandas** - Manipulação de dados
-- **NumPy** - Computação numérica
+### Visualization
+- **Plotly** - Interactive charts
+- **Pandas** - Data manipulation
+- **NumPy** - Numerical computation
 
 ## 🎨 Interface
 
-### Design Profissional
-- Cores corporativas (azul e gradientes)
-- Layout responsivo
-- Componentes interativos
-- Feedback visual em tempo real
+### Professional Design
+- Corporate colors (blue and gradients)
+- Responsive layout
+- Interactive components
+- Real-time visual feedback
 
-### Navegação
-- Sistema de abas organizado
-- Sidebar com configurações
-- Métricas em tempo real
-- Gráficos interativos
+### Navigation
+- Organized tab system
+- Sidebar with settings
+- Real-time metrics
+- Interactive charts
 
-## 🔧 Configurações
+## 🔧 Settings
 
-### Limiar de Confiança
+### Confidence Threshold
 - Range: 0.1 - 1.0
-- Padrão: 0.5
-- Ajustável em tempo real
+- Default: 0.5
+- Adjustable in real-time
 
-### Formatos Suportados
+### Supported Formats
 - PNG, JPG, JPEG
-- Resolução automática
-- Otimização para 640x640
+- Automatic resolution
+- Optimization for 640x640
 
-## 📝 Versões
+## 📝 Versions
 
-### app.py (Completo)
-- Requer YOLOv8 instalado
-- Detecção real com modelo treinado
-- Dependências: PyTorch, Ultralytics
+### app.py (Complete)
+- Requires YOLOv8 installed
+- Real detection with trained model
+- Dependencies: PyTorch, Ultralytics
 
 ### app_lite.py (Demo)
-- Simulação de detecções
-- Sem dependências pesadas
-- Ideal para demonstração
+- Simulated detections
+- No heavy dependencies
+- Ideal for demonstration
 
 ## 🚀 Deploy
 
 ### Streamlit Cloud
-1. Conecte o repositório
+1. Connect the repository
 2. Configure `requirements_lite.txt`
-3. Execute `streamlit run app_lite.py`
+3. Run `streamlit run app_lite.py`
 
 ### Local
 ```bash
 ./run_app.sh
 ```
 
-## 📖 Documentação
+## 📖 Documentation
 
-- **README_FINAL.md** - Este arquivo
-- **README_app.md** - Documentação do app
-- **notebooks/** - Processo de desenvolvimento
-- **demo.py** - Verificação de dependências
+- **README_FINAL.md** - This file
+- **README_app.md** - App documentation
+- **notebooks/** - Development process
+- **demo.py** - Dependency verification
 
-## 🤝 Contribuição
+## 🤝 Contribution
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+This project is under the MIT license. See the `LICENSE` file for more details.
 
-## 👨‍💻 Autor
+## 👨‍💻 Author
 
-Desenvolvido com ❤️ usando Streamlit e YOLOv8
+Developed with ❤️ using Streamlit and YOLOv8
 
 ---
 
-**🎉 Pronto para usar! Execute `./run_app.sh` e comece a detectar placas de trânsito!**
+**🎉 Ready to use! Run `./run_app.sh` and start detecting road signs!**

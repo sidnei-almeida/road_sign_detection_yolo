@@ -21,11 +21,11 @@ import torch
 import tempfile
 import requests
 
-# Base do app para construir caminhos robustos
+# App base for building robust paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(BASE_DIR, "modelos")
 DEFAULT_MODEL_URLS = [
-    # User-owned repo raw URLs (ajuste se necessário)
+    # User-owned repo raw URLs (adjust if necessary)
     "https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/modelos/best.pt",
     "https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/weights/best.pt",
 ]
@@ -37,7 +37,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Estilo premium dark (inspirado no app LSTM, paleta ajustada)
+# Premium dark style (inspired by LSTM app, adjusted palette)
 st.markdown(
     """
 <style>
@@ -65,7 +65,7 @@ h1, h2, h3, h4, h5 { font-family: 'Inter', sans-serif; color: var(--text); }
 .button-primary .st-emotion-cache-7ym5gk { background: linear-gradient(135deg, var(--primary), var(--accent)) !important; color: #fff !important; border: 0 !important; }
 hr { border-top: 1px solid rgba(255,255,255,0.08); }
 
-/* Ícone de semáforo (emoji fallback) */
+/* Traffic light icon (emoji fallback) */
 .tl-wrap { display:inline-flex; align-items:center; gap: 12px; }
 .tl-icon { width: 28px; height: 64px; border-radius: 8px; background: #0b0e14; border: 1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; justify-content:space-around; padding:6px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03); }
 .tl-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 12px rgba(0,0,0,0.6); margin:auto; }
@@ -73,7 +73,7 @@ hr { border-top: 1px solid rgba(255,255,255,0.08); }
 .tl-yellow { background: #ffd666; box-shadow: 0 0 10px rgba(255,214,102,0.8); }
 .tl-green { background: #52c41a; box-shadow: 0 0 10px rgba(82,196,26,0.8); }
 
-/* Chips de classe */
+/* Class chips */
 .chips { display:flex; gap:6px; flex-wrap:wrap; }
 .chip { padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid rgba(255,255,255,0.15); }
 .chip-traffic { background: rgba(0,194,255,0.12); border-color: rgba(0,194,255,0.35); }
@@ -114,7 +114,7 @@ def to_canonical(name: str) -> str:
 
 @st.cache_resource(show_spinner=False)
 def load_model() -> YOLO | None:
-    # 1) Tenta pesos locais
+    # 1) Try local weights
     candidate_paths = [
         os.path.join(WEIGHTS_DIR, "best.pt"),
         os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "best.pt"),
@@ -126,9 +126,9 @@ def load_model() -> YOLO | None:
             try:
                 return YOLO(path)
             except Exception as e:
-                st.warning(f"Falha ao carregar modelo em {path}: {e}")
+                st.warning(f"Failed to load model at {path}: {e}")
 
-    # 2) Se não achar, tenta baixar via MODEL_URL ou URLs padrão
+    # 2) If not found, try downloading via MODEL_URL or default URLs
     urls = []
     env_url = os.getenv("MODEL_URL") or st.secrets.get("MODEL_URL", None)
     if env_url:
@@ -140,20 +140,20 @@ def load_model() -> YOLO | None:
 
     for url in urls:
         try:
-            with st.spinner(f"Baixando pesos do modelo...\n{url}"):
+            with st.spinner(f"Downloading model weights...\n{url}"):
                 r = requests.get(url, timeout=60)
                 r.raise_for_status()
                 with open(target_path, "wb") as f:
                     f.write(r.content)
             if os.path.getsize(target_path) < 1_000_000:  # sanity check 1MB
-                st.warning("Arquivo de pesos baixado é muito pequeno; tentando próxima fonte...")
+                st.warning("Downloaded weights file is too small; trying next source...")
                 continue
-            st.success("Pesos baixados com sucesso.")
+            st.success("Weights downloaded successfully.")
             return YOLO(target_path)
         except Exception as e:
-            st.warning(f"Falha ao baixar de {url}: {e}")
+            st.warning(f"Failed to download from {url}: {e}")
 
-    st.error("Não foi possível localizar ou baixar os pesos YOLO. Configure MODEL_URL ou coloque 'best.pt' em 'modelos/'.")
+    st.error("Could not locate or download YOLO weights. Configure MODEL_URL or place 'best.pt' in 'modelos/'.")
     return None
 
 @st.cache_data(show_spinner=False)
@@ -210,14 +210,14 @@ def get_env_status():
 
 
 def show_status(model, data_cfg, results_df):
-    st.markdown("### 📊 Status do Sistema")
+    st.markdown("### 📊 System Status")
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown(
             f"""
 <div class="metric">
-  <b>🧠 Modelo YOLO</b><br/>
-  <span class="badge">{ 'Carregado' if model else 'Indisponível' }</span>
+  <b>🧠 YOLO Model</b><br/>
+  <span class="badge">{ 'Loaded' if model else 'Unavailable' }</span>
 </div>
 """,
             unsafe_allow_html=True,
@@ -227,7 +227,7 @@ def show_status(model, data_cfg, results_df):
             f"""
 <div class="metric">
   <b>📁 Dataset</b><br/>
-  <span class="badge">{ 'OK' if data_cfg else 'Não encontrado' }</span>
+  <span class="badge">{ 'OK' if data_cfg else 'Not found' }</span>
 </div>
 """,
             unsafe_allow_html=True,
@@ -236,8 +236,8 @@ def show_status(model, data_cfg, results_df):
         st.markdown(
             f"""
 <div class="metric">
-  <b>📈 Métricas de Treino</b><br/>
-  <span class="badge">{ 'Disponíveis' if results_df is not None else 'Sem resultados' }</span>
+  <b>📈 Training Metrics</b><br/>
+  <span class="badge">{ 'Available' if results_df is not None else 'No results' }</span>
 </div>
 """,
             unsafe_allow_html=True,
@@ -252,7 +252,7 @@ def page_home(model, data_cfg, results_df):
         </div>',
         unsafe_allow_html=True,
     )
-    st.markdown('<div class="subtitle">Detecção de sinais de trânsito com modelo YOLO treinado no seu dataset</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Road sign detection with YOLO model trained on your dataset</div>', unsafe_allow_html=True)
     show_status(model, data_cfg, results_df)
     st.markdown("---")
 
@@ -261,7 +261,7 @@ def page_home(model, data_cfg, results_df):
         num_classes = len(data_cfg.get("names", [])) if data_cfg else 0
         st.markdown(f"""
 <div class="card">
-  <h4>📚 Número de classes</h4>
+  <h4>📚 Number of classes</h4>
   <div class="badge">{num_classes}</div>
 </div>
 """, unsafe_allow_html=True)
@@ -272,7 +272,7 @@ def page_home(model, data_cfg, results_df):
             last_epoch = 0
         st.markdown(f"""
 <div class="card">
-  <h4>⏱️ Épocas treinadas</h4>
+  <h4>⏱️ Trained epochs</h4>
   <div class="badge">{last_epoch}</div>
 </div>
 """, unsafe_allow_html=True)
@@ -290,15 +290,15 @@ def page_home(model, data_cfg, results_df):
 """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### ✨ Destaques do Treino")
+    st.markdown("### ✨ Training Highlights")
     images, _, _ = load_training_artifacts()
     c1, c2 = st.columns(2)
     with c1:
         if os.path.exists(images["results"]):
-            st.image(images["results"], caption="Resultados de treino", use_container_width=True)
+            st.image(images["results"], caption="Training results", use_container_width=True)
     with c2:
         if os.path.exists(images["confusion_norm"]):
-            st.image(images["confusion_norm"], caption="Matriz de Confusão (normalizada)", use_container_width=True)
+            st.image(images["confusion_norm"], caption="Confusion Matrix (normalized)", use_container_width=True)
 
 
 def yolo_predict(model: YOLO, image: Image.Image, conf: float, iou: float, imgsz: int):
@@ -308,17 +308,17 @@ def yolo_predict(model: YOLO, image: Image.Image, conf: float, iou: float, imgsz
 
 
 def _gather_example_images():
-    # principal
+    # primary
     preferred = sorted(glob.glob(os.path.join(BASE_DIR, "dados", "image_examples", "*.jpg")))
     preferred += sorted(glob.glob(os.path.join(BASE_DIR, "dados", "image_examples", "*.png")))
     if preferred:
         return preferred[:12]
-    # legado
+    # legacy
     legacy = sorted(glob.glob(os.path.join(BASE_DIR, "dados", "examples", "*.jpg")))
     legacy += sorted(glob.glob(os.path.join(BASE_DIR, "dados", "examples", "*.png")))
     if legacy:
         return legacy[:12]
-    # fallback final
+    # final fallback
     base = os.path.join(BASE_DIR, "resultados", "runs", "detect", "train")
     fallback = sorted(glob.glob(os.path.join(base, "val_batch*_pred.jpg")))
     if not fallback:
@@ -333,7 +333,7 @@ def _draw_boxes(image_np: np.ndarray, boxes_xyxy: np.ndarray, classes: np.ndarra
     for i in range(len(classes)):
         raw = names.get(int(classes[i]), str(int(classes[i])))
         canon = to_canonical(raw)
-        # Se filtro estiver vazio, ou se o rótulo canônico estiver selecionado, desenha
+        # If filter is empty, or if canonical label is selected, draw
         if include_set and canon not in include_set:
             continue
         x1, y1, x2, y2 = boxes_xyxy[i].astype(int)
@@ -348,19 +348,19 @@ def _draw_boxes(image_np: np.ndarray, boxes_xyxy: np.ndarray, classes: np.ndarra
 
 
 def page_detect(model):
-    st.markdown("## 🔎 Detecção")
-    st.markdown("Faça upload, use a câmera ou selecione um exemplo.")
+    st.markdown("## 🔎 Detection")
+    st.markdown("Upload an image, use the camera, or select an example.")
 
-    st.info("Este modelo detecta apenas: Traffic Light, Stop, Speedlimit, Crosswalk.")
+    st.info("This model detects only: Traffic Light, Stop, Speedlimit, Crosswalk.")
 
-    with st.expander("Diagnóstico de Inferência", expanded=False):
+    with st.expander("Inference Diagnostics", expanded=False):
         if model is not None:
             try:
                 names = getattr(model.model, "names", None) or getattr(model, "names", None)
-                st.markdown("**Classes do modelo (names):**")
+                st.markdown("**Model classes (names):**")
                 st.code(str(names))
             except Exception as e:
-                st.write(f"Erro ao acessar names: {e}")
+                st.write(f"Error accessing names: {e}")
         weight_candidates = [
             os.path.join(WEIGHTS_DIR, "best.pt"),
             os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "best.pt"),
@@ -368,44 +368,44 @@ def page_detect(model):
             os.path.join(BASE_DIR, "resultados", "runs", "detect", "train", "weights", "last.pt"),
         ]
         sizes = {p: (os.path.exists(p) and os.path.getsize(p)) for p in weight_candidates}
-        st.markdown("**Arquivos de peso e tamanhos (bytes):**")
+        st.markdown("**Weight files and sizes (bytes):**")
         st.code(str(sizes))
-        st.caption("Se nenhum arquivo existir ou os tamanhos forem muito pequenos, configure a variável MODEL_URL nas secrets/env para baixar os pesos.")
+        st.caption("If no files exist or sizes are too small, configure MODEL_URL in secrets/env to download weights.")
 
     # Presets
     cols_p = st.columns(3)
-    preset = st.session_state.get("preset", "Equilibrado")
+    preset = st.session_state.get("preset", "Balanced")
     with cols_p[0]:
-        if st.button("⚡ Rápido"):
-            preset = "Rápido"
+        if st.button("⚡ Fast"):
+            preset = "Fast"
     with cols_p[1]:
-        if st.button("⚖️ Equilibrado"):
-            preset = "Equilibrado"
+        if st.button("⚖️ Balanced"):
+            preset = "Balanced"
     with cols_p[2]:
-        if st.button("🎯 Preciso"):
-            preset = "Preciso"
+        if st.button("🎯 Precise"):
+            preset = "Precise"
     st.session_state["preset"] = preset
 
-    # Valores padrão por preset
-    if preset == "Rápido":
+    # Default values per preset
+    if preset == "Fast":
         conf_default, iou_default, size_default = 0.35, 0.45, 640
-    elif preset == "Preciso":
+    elif preset == "Precise":
         conf_default, iou_default, size_default = 0.15, 0.55, 960
     else:
         conf_default, iou_default, size_default = 0.25, 0.50, 768
 
     col1, col2, col3 = st.columns([2,1,1])
     with col2:
-        conf = st.slider("Confiança mínima", 0.05, 0.95, conf_default, 0.05)
+        conf = st.slider("Minimum confidence", 0.05, 0.95, conf_default, 0.05)
     with col3:
         iou = st.slider("IoU", 0.1, 0.9, iou_default, 0.05)
-    imgsz = st.select_slider("Tamanho", options=[640, 704, 768, 832, 896, 960], value=size_default)
+    imgsz = st.select_slider("Size", options=[640, 704, 768, 832, 896, 960], value=size_default)
 
-    # Filtros por classe
-    selected_classes = st.multiselect("Filtrar classes", ALLOWED_CLASSES, default=ALLOWED_CLASSES)
+    # Class filters
+    selected_classes = st.multiselect("Filter classes", ALLOWED_CLASSES, default=ALLOWED_CLASSES)
     st.markdown('<div class="chips"><span class="chip chip-traffic">Traffic Light</span><span class="chip chip-stop">Stop</span><span class="chip chip-speed">Speedlimit</span><span class="chip chip-cross">Crosswalk</span></div>', unsafe_allow_html=True)
 
-    tab_up, tab_cam, tab_ex, tab_batch = st.tabs(["Upload", "Câmera", "Exemplos", "Lote"])
+    tab_up, tab_cam, tab_ex, tab_batch = st.tabs(["Upload", "Camera", "Examples", "Batch"])
 
     def run_and_show(pil_img: Image.Image, key_prefix: str = "single"):
         start = time.time()
@@ -420,36 +420,36 @@ def page_detect(model):
 
             img_np = np.array(pil_img.convert("RGB"))
             annotated, drawn = _draw_boxes(img_np, xyxy, cls, confs, names, selected_classes)
-            # Fallback: se houve detecções mas nenhuma casou com os filtros/nomes, desenhar todas
+            # Fallback: if there were detections but none matched filters/names, draw all
             if r0.boxes is not None and len(r0.boxes) > 0 and drawn == 0:
                 annotated, _ = _draw_boxes(img_np, xyxy, cls, confs, names, include=[])
-                st.caption("Nenhuma detecção correspondeu ao filtro/nomes esperados. Exibindo todas as classes retornadas pelo modelo.")
+                st.caption("No detections matched the expected filter/names. Showing all classes returned by the model.")
 
-            st.image(annotated, caption=f"Detecções ({latency:.1f} ms)", use_container_width=True)
+            st.image(annotated, caption=f"Detections ({latency:.1f} ms)", use_container_width=True)
 
-            # Botão de download da imagem anotada
+            # Download button for annotated image
             buf = io.BytesIO()
             Image.fromarray(annotated).save(buf, format="PNG")
-            st.download_button("⬇️ Baixar imagem anotada", data=buf.getvalue(), file_name=f"deteccao_{key_prefix}.png", mime="image/png")
+            st.download_button("⬇️ Download annotated image", data=buf.getvalue(), file_name=f"detection_{key_prefix}.png", mime="image/png")
 
-            # Histórico (apenas miniatura)
+            # History (thumbnail only)
             hist = st.session_state.get("history", [])
             thumb = cv2.resize(annotated, (224, int(224 * annotated.shape[0] / max(annotated.shape[1], 1))))
             hist.insert(0, {"img": thumb})
             st.session_state["history"] = hist[:12]
         else:
-            st.warning("Sem resultados de detecção.")
+            st.warning("No detection results.")
 
-    # Upload tradicional
+    # Traditional upload
     with tab_up:
-        uploaded = st.file_uploader("Imagem (PNG/JPG)", type=["png", "jpg", "jpeg"], accept_multiple_files=False)
+        uploaded = st.file_uploader("Image (PNG/JPG)", type=["png", "jpg", "jpeg"], accept_multiple_files=False)
         if uploaded is not None and model:
             image = Image.open(uploaded)
             run_and_show(image, key_prefix="upload")
 
-    # Câmera via streamlit-webrtc
+    # Camera via streamlit-webrtc
     with tab_cam:
-        st.caption("Permita o uso da câmera do dispositivo para capturar uma imagem.")
+        st.caption("Allow access to device camera to capture an image.")
         ctx = webrtc_streamer(key="camera", mode=WebRtcMode.SENDRECV, video_frame_callback=None, async_processing=False, media_stream_constraints={"video": True, "audio": False})
         captured_img = None
         if ctx and ctx.state.playing and ctx.video_receiver:
@@ -460,27 +460,27 @@ def page_detect(model):
                     captured_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             except Exception:
                 pass
-        if st.button("📸 Capturar e Detectar", type="primary") and model:
+        if st.button("📸 Capture and Detect", type="primary") and model:
             if captured_img is not None:
                 run_and_show(captured_img, key_prefix="camera")
             else:
-                st.warning("Nenhum frame capturado ainda.")
+                st.warning("No frame captured yet.")
 
-    # Exemplos
+    # Examples
     with tab_ex:
         examples = _gather_example_images()
         if examples:
-            selected = image_select("Escolha um exemplo", images=[Image.open(p) for p in examples], captions=[os.path.basename(p) for p in examples])
+            selected = image_select("Choose an example", images=[Image.open(p) for p in examples], captions=[os.path.basename(p) for p in examples])
             if selected is not None and model:
-                if st.button("Detectar no Exemplo", key="detect_example", type="primary"):
+                if st.button("Detect Example", key="detect_example", type="primary"):
                     img_obj = selected if isinstance(selected, Image.Image) else Image.open(selected)
-                    run_and_show(img_obj, key_prefix="exemplo")
+                    run_and_show(img_obj, key_prefix=";">exemplo")
         else:
-            st.info("Nenhuma imagem de exemplo encontrada.")
+            st.info("No example images found.")
 
-    # Lote
+    # Batch
     with tab_batch:
-        many = st.file_uploader("Imagens (múltiplas)", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+        many = st.file_uploader("Images (multiple)", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
         if many and model:
             prog = st.progress(0)
             gallery_cols = st.columns(3)
@@ -488,11 +488,11 @@ def page_detect(model):
                 img = Image.open(uf)
                 run_and_show(img, key_prefix=f"lote_{i}")
                 prog.progress(int((i + 1) / len(many) * 100))
-            st.success("Lote processado.")
+            st.success("Batch processed.")
 
-    # Histórico da sessão
+    # Session history
     st.markdown("---")
-    st.markdown("### Histórico da Sessão")
+    st.markdown("### Session History")
     hist = st.session_state.get("history", [])
     if hist:
         cols = st.columns(6)
@@ -500,27 +500,27 @@ def page_detect(model):
             with cols[i % 6]:
                 st.image(item["img"], use_container_width=True)
     else:
-        st.caption("Você ainda não gerou detecções nesta sessão.")
+        st.caption("You haven't generated any detections in this session yet.")
 
 
 def page_training():
-    st.markdown("## 📈 Treinamento")
+    st.markdown("## 📈 Training")
     images, results_df, args = load_training_artifacts()
 
     col1, col2 = st.columns(2)
     with col1:
         if os.path.exists(images["confusion"]):
-            st.image(images["confusion"], caption="Matriz de Confusão", use_container_width=True)
+            st.image(images["confusion"], caption="Confusion Matrix", use_container_width=True)
         if os.path.exists(images["labels"]):
-            st.image(images["labels"], caption="Distribuição de labels", use_container_width=True)
+            st.image(images["labels"], caption="Label distribution", use_container_width=True)
     with col2:
         if os.path.exists(images["results"]):
-            st.image(images["results"], caption="Resultados globais", use_container_width=True)
+            st.image(images["results"], caption="Global results", use_container_width=True)
 
     st.markdown("---")
 
     if results_df is not None:
-        st.markdown("### Evolução das Métricas por Época")
+        st.markdown("### Metric Evolution by Epoch")
         metric_cols = [
             c for c in results_df.columns 
             if any(k in c for k in ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)", "metrics/mAP50-95(B)", "train/box_loss", "train/cls_loss", "val/box_loss", "val/cls_loss"])
@@ -534,25 +534,25 @@ def page_training():
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font_color='#E6E6E6',
-                xaxis_title="Época",
-                yaxis_title="Valor",
-                legend_title="Métrica",
+                xaxis_title="Epoch",
+                yaxis_title="Value",
+                legend_title="Metric",
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Não foram encontradas colunas de métricas esperadas no results.csv.")
+            st.info("Expected metric columns not found in results.csv.")
     else:
-        st.warning("Arquivo results.csv não encontrado em resultados/runs/detect/train.")
+        st.warning("File results.csv not found in resultados/runs/detect/train.")
 
     st.markdown("---")
     if images["batches"]:
-        st.markdown("### Amostras de Treino")
+        st.markdown("### Training Samples")
         cols = st.columns(3)
         for i, path in enumerate(images["batches"]):
             with cols[i % 3]:
                 st.image(path, use_container_width=True)
     if images["val_preds"]:
-        st.markdown("### Predições no Conjunto de Validação")
+        st.markdown("### Validation Set Predictions")
         cols = st.columns(3)
         for i, path in enumerate(images["val_preds"]):
             with cols[i % 3]:
@@ -560,33 +560,33 @@ def page_training():
 
 
 def page_data():
-    st.markdown("## 🗂️ Dados do Projeto")
+    st.markdown("## 🗂️ Project Data")
     data_cfg, ann_df = load_dataset_info()
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("### Configuração do Dataset (YAML)")
+        st.markdown("### Dataset Configuration (YAML)")
         if data_cfg:
             st.json(data_cfg)
         else:
-            st.warning("Arquivo dados/road_signs_dataset.yaml não encontrado.")
+            st.warning("File dados/road_signs_dataset.yaml not found.")
     with col2:
-        st.markdown("### Anotações")
+        st.markdown("### Annotations")
         if ann_df is not None:
             st.dataframe(ann_df.head(200), use_container_width=True)
-            st.caption("Visualizando até 200 primeiras linhas do CSV de anotações.")
+            st.caption("Showing first 200 rows of annotations CSV.")
         else:
-            st.warning("Arquivo dados/road_signs_annotations.csv não encontrado.")
+            st.warning("File dados/road_signs_annotations.csv not found.")
 
 
 def page_about():
-    st.markdown("## ℹ️ Sobre o Projeto")
+    st.markdown("## ℹ️ About the Project")
     st.markdown(
         """
 <div class="card">
-<p>Aplicativo profissional em Streamlit para <b>detecção de sinais de trânsito</b> com YOLO, com interface dark premium, páginas de detecção, análise de treino e dados do projeto.</p>
-<p><b>Autor:</b> <a href="https://github.com/sidnei-almeida" target="_blank">sidnei-almeida</a><br/>
-<b>Contato:</b> <a href="mailto:sidnei.almeida1806@gmail.com">sidnei.almeida1806@gmail.com</a></p>
+<p>Professional Streamlit app for <b>road sign detection</b> with YOLO, featuring a premium dark interface, detection pages, training analysis, and project data.</p>
+<p><b>Author:</b> <a href="https://github.com/sidnei-almeida" target="_blank">sidnei-almeida</a><br/>
+<b>Contact:</b> <a href="mailto:sidnei.almeida1806@gmail.com">sidnei.almeida1806@gmail.com</a></p>
 </div>
 """,
         unsafe_allow_html=True,
@@ -595,10 +595,10 @@ def page_about():
 
 def main():
     with st.sidebar:
-        st.markdown("<h2 style='color:#00C2FF'>Navegação</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color:#00C2FF'>Navigation</h2>", unsafe_allow_html=True)
         selected = option_menu(
             menu_title=None,
-            options=["Início", "Detecção", "Treinamento", "Dados", "Sobre"],
+            options=["Home", "Detection", "Training", "Data", "About"],
             icons=["house", "camera", "graph-up", "folder", "info-circle"],
             default_index=0,
             styles={
@@ -609,15 +609,15 @@ def main():
             },
         )
 
-        # Status do ambiente (apenas na sidebar)
+        # Environment status (sidebar only)
         st.markdown("---")
-        st.markdown("<h4 style='margin-bottom:0.5rem;'>🖥️ Ambiente</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='margin-bottom:0.5rem;'>🖥️ Environment</h4>", unsafe_allow_html=True)
         env = get_env_status()
         st.markdown(
             f"""
 <div class="card">
-  <div><b>Dispositivo:</b> {env['device']}</div>
-  <div><b>Nome:</b> {env['device_name']}</div>
+  <div><b>Device:</b> {env['device']}</div>
+  <div><b>Name:</b> {env['device_name']}</div>
   <div><b>Python:</b> {env['python']}</div>
   <div><b>Torch:</b> {env['torch']} (CUDA: {env['cuda']})</div>
   <div><b>Ultralytics:</b> {env['ultralytics']}</div>
@@ -630,13 +630,13 @@ def main():
     data_cfg, _ = load_dataset_info()
     _, results_df, _ = load_training_artifacts()
 
-    if selected == "Início":
+    if selected == "Home":
         page_home(model, data_cfg, results_df)
-    elif selected == "Detecção":
+    elif selected == "Detection":
         page_detect(model)
-    elif selected == "Treinamento":
+    elif selected == "Training":
         page_training()
-    elif selected == "Dados":
+    elif selected == "Data":
         page_data()
     else:
         page_about()

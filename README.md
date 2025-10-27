@@ -1,111 +1,111 @@
 # 🚦 Road Sign Detection • YOLO
 
-Detecção de placas de trânsito com YOLO, acompanhada de um aplicativo Streamlit elegante (tema dark) para inferência, visualização de métricas de treino e exploração de dados.
+Road sign detection with YOLO, accompanied by an elegant Streamlit application (dark theme) for inference, training metrics visualization, and data exploration.
 
-- **Autor**: [sidnei-almeida](https://github.com/sidnei-almeida)
-- **Contato**: <sidnei.almeida1806@gmail.com>
-
----
-
-## ✨ Destaques
-- App Streamlit premium com tema dark e paleta ciano/roxo
-- Página de **Detecção** com upload de imagens, **câmera (streamlit-webrtc)** e **seleção de exemplos (streamlit-image-select)**
-- Página de **Treinamento** com gráficos (results.csv) e artefatos (matriz de confusão, batches, validação)
-- Página de **Dados** exibindo `dados/road_signs_dataset.yaml` e amostra do CSV de anotações
-
-> Observação: o modelo atual detecta apenas: **Traffic Light**, **Stop**, **Speedlimit**, **Crosswalk**.
+- **Author**: [sidnei-almeida](https://github.com/sidnei-almeida)
+- **Contact**: <sidnei.almeida1806@gmail.com>
 
 ---
 
-## 🚀 Como executar
+## ✨ Highlights
+- Premium Streamlit app with dark theme and cyan/purple palette
+- **Detection** page with image upload, **camera (streamlit-webrtc)** and **example selection (streamlit-image-select)**
+- **Training** page with graphs (results.csv) and artifacts (confusion matrix, batches, validation)
+- **Data** page displaying `dados/road_signs_dataset.yaml` and annotation CSV sample
 
-Pré-requisitos: Python 3.10+ e dependências do `requirements.txt`.
+> Note: the current model detects only: **Traffic Light**, **Stop**, **Speedlimit**, **Crosswalk**.
+
+---
+
+## 🚀 How to run
+
+Prerequisites: Python 3.10+ and dependencies from `requirements.txt`.
 
 ```bash
-# clonar e entrar no projeto
+# clone and enter the project
 git clone https://github.com/sidnei-almeida/road_sign_detection_yolo.git
 cd road_sign_detection_yolo
 
-# (opcional) criar venv
+# (optional) create venv
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # .\venv\Scripts\activate  # Windows PowerShell
 
-# instalar dependências
+# install dependencies
 pip install -r requirements.txt
 
-# rodar o app
+# run the app
 bash run_app.sh
-# ou
+# or
 streamlit run app.py
 ```
 
-Coloque os pesos do modelo em `modelos/best.pt` (ou utilize `resultados/runs/detect/train/weights/best.pt`).
+Place the model weights in `modelos/best.pt` (or use `resultados/runs/detect/train/weights/best.pt`).
 
 ---
 
-## 🧱 Estrutura
+## 🧱 Structure
 
 ```
 road_sign_detection_yolo/
-├─ app.py                         # App Streamlit
-├─ .streamlit/config.toml         # Tema dark customizado
+├─ app.py                         # Streamlit app
+├─ .streamlit/config.toml         # Custom dark theme
 ├─ dados/
-│  ├─ road_signs_dataset.yaml     # Config do dataset YOLO
-│  ├─ road_signs_annotations.csv  # Anotações (amostra/EDA)
-│  └─ image_examples/             # Imagens para a aba Exemplos (PNG/JPG)
+│  ├─ road_signs_dataset.yaml     # YOLO dataset config
+│  ├─ road_signs_annotations.csv  # Annotations (sample/EDA)
+│  └─ image_examples/             # Images for Examples tab (PNG/JPG)
 ├─ modelos/
-│  ├─ best.pt                     # Pesos do modelo (colocar aqui)
+│  ├─ best.pt                     # Model weights (place here)
 │  └─ last.pt
-├─ resultados/runs/detect/train/  # Artefatos de treino do YOLO
-│  ├─ results.csv                 # Métricas por época
-│  ├─ results.png                 # Resumo
-│  ├─ confusion_matrix.png        # Matriz de confusão
+├─ resultados/runs/detect/train/  # YOLO training artifacts
+│  ├─ results.csv                 # Metrics per epoch
+│  ├─ results.png                 # Summary
+│  ├─ confusion_matrix.png        # Confusion matrix
 │  ├─ confusion_matrix_normalized.png
-│  ├─ train_batch*.jpg            # Lotes de treino
-│  ├─ val_batch*_pred.jpg         # Predições de validação
-│  └─ weights/best.pt             # Pesos
-└─ notebooks/                     # EDA, Preprocessamento, Treino
+│  ├─ train_batch*.jpg            # Training batches
+│  ├─ val_batch*_pred.jpg         # Validation predictions
+│  └─ weights/best.pt             # Weights
+└─ notebooks/                     # EDA, Preprocessing, Training
 ```
 
 ---
 
-## 📷 Exemplos e Artefatos (links diretos)
+## 📷 Examples and Artifacts (direct links)
 - Dataset YAML: [`dados/road_signs_dataset.yaml`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/road_signs_dataset.yaml)
-- Anotações CSV: [`dados/road_signs_annotations.csv`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/road_signs_annotations.csv)
-- Artefatos de treino:
+- Annotations CSV: [`dados/road_signs_annotations.csv`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/road_signs_annotations.csv)
+- Training artifacts:
   - [`results.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/results.png)
   - [`confusion_matrix.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/confusion_matrix.png)
   - [`confusion_matrix_normalized.png`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/confusion_matrix_normalized.png)
   - [`labels.jpg`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/labels.jpg)
   - [`results.csv`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/results.csv)
-- Pesos do modelo (arquivo grande):
+- Model weights (large file):
   - [`modelos/best.pt`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/modelos/best.pt)
   - [`resultados/runs/detect/train/weights/best.pt`](https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/resultados/runs/detect/train/weights/best.pt)
-- Exemplos (substitua pelo nome real que estiver em `dados/image_examples/`):
+- Examples (replace with actual name in `dados/image_examples/`):
   - `https://raw.githubusercontent.com/sidnei-almeida/road_sign_detection_yolo/main/dados/image_examples/road0.jpg`
 
 ---
 
-## 📈 App – Páginas
-- **Início**: status do sistema, resumo de classes e mAP, destaques do treino
-- **Detecção**: upload | câmera | exemplos | lote; presets de inferência; filtros por classe; download da imagem anotada
-- **Treinamento**: gráficos interativos a partir do `results.csv` + imagens principais
-- **Dados**: visualização do YAML do dataset e amostra de anotações
-- **Sobre**: informações do projeto e contato
+## 📈 App – Pages
+- **Home**: system status, classes and mAP summary, training highlights
+- **Detection**: upload | camera | examples | batch; inference presets; class filters; annotated image download
+- **Training**: interactive graphs from `results.csv` + main images
+- **Data**: dataset YAML visualization and annotation sample
+- **About**: project information and contact
 
 ---
 
-## 🧪 Exemplos
-- Coloque imagens em `dados/image_examples/` para aparecerem na aba Exemplos.
-- Se a pasta estiver vazia, o app tenta usar `dados/examples/` (legado) ou imagens de validação de `resultados/runs/detect/train`.
+## 🧪 Examples
+- Place images in `dados/image_examples/` to appear in the Examples tab.
+- If the folder is empty, the app tries to use `dados/examples/` (legacy) or validation images from `resultados/runs/detect/train`.
 
 ---
 
-## 📬 Contato
+## 📬 Contact
 - GitHub: [sidnei-almeida](https://github.com/sidnei-almeida)
 - E-mail: <sidnei.almeida1806@gmail.com>
 
 ```text
-Se este projeto foi útil para você, deixe uma estrela no repositório ⭐
+If this project was useful to you, leave a star on the repository ⭐
 ```
