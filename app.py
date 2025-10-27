@@ -474,7 +474,7 @@ def page_detect(model):
             if selected is not None and model:
                 if st.button("Detect Example", key="detect_example", type="primary"):
                     img_obj = selected if isinstance(selected, Image.Image) else Image.open(selected)
-                    run_and_show(img_obj, key_prefix=";">exemplo")
+                    run_and_show(img_obj, key_prefix="exemplo")
         else:
             st.info("No example images found.")
 
