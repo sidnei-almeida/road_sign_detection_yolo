@@ -6,4 +6,4 @@ if [ -d "venv/bin" ]; then
 	source venv/bin/activate
 fi
 
-exec streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+exec uvicorn app:app --host 0.0.0.0 --port 7860
