@@ -7,3 +7,7 @@ services:
     envVars:
       - key: MODEL_URL
         sync: false
+      - key: DEFAULT_IMAGE_SIZE
+        value: "640"
+      - key: OMP_NUM_THREADS
+        value: "1"

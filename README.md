@@ -159,6 +159,8 @@ Files under **`modelos/*.pt`** are intended for **Git LFS** (see `.gitattributes
 |----------|-------------|---------|
 | `MODEL_URL` | HTTPS URL to download `.pt` weights at startup | — |
 | `PORT` | Uvicorn listen port | `8000` |
+| `DEFAULT_IMAGE_SIZE` | YOLO `imgsz` default for `/predict` | `640` |
+| `CORS_ORIGINS` | Origens permitidas (vírgula) ou `*` | `*` |
 
 ---
 

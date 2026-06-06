@@ -2,6 +2,7 @@ import base64
 import io
 import os
 import time
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -89,6 +90,8 @@ MODEL: Optional[YOLO] = None
 MODEL_PATH: Optional[str] = None
 CLASS_NAMES: List[str] = []
 DEVICE: str = "cpu"
+DEFAULT_IMAGE_SIZE = int(os.getenv("DEFAULT_IMAGE_SIZE", "640"))
+INFERENCE_LOCK = asyncio.Semaphore(1)
 
 
 def _load_dataset_classes() -> List[str]:
@@ -213,6 +216,23 @@ def _get_device() -> str:
     return "cpu"
 
 
+def _run_predict(
+    image_np: np.ndarray,
+    conf_threshold: float,
+    iou_threshold: float,
+    image_size: int,
+) -> Any:
+    with torch.inference_mode():
+        return MODEL.predict(
+            image_np,
+            conf=conf_threshold,
+            iou=iou_threshold,
+            imgsz=image_size,
+            device=DEVICE,
+            verbose=False,
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global MODEL, MODEL_PATH, CLASS_NAMES, DEVICE
@@ -234,10 +254,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# allow_credentials=False: browsers reject Access-Control-Allow-Origin: * with credentials.
+# Set CORS_ORIGINS (comma-separated) to restrict in production if needed.
+_cors_raw = os.getenv("CORS_ORIGINS", "*")
+_cors_origins = [origin.strip() for origin in _cors_raw.split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins or ["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -286,7 +310,7 @@ async def predict(
     file: UploadFile = File(..., description="Image file (PNG or JPG)"),
     conf_threshold: float = 0.25,
     iou_threshold: float = 0.5,
-    image_size: int = 768,
+    image_size: int = DEFAULT_IMAGE_SIZE,
     include_image: bool = False,
 ) -> PredictionResponse:
     if MODEL is None:
@@ -304,14 +328,14 @@ async def predict(
     image_np = np.array(image)
     start_time = time.perf_counter()
     try:
-        results = MODEL.predict(
-            image_np,
-            conf=conf_threshold,
-            iou=iou_threshold,
-            imgsz=image_size,
-            device=DEVICE,
-            verbose=False,
-        )
+        async with INFERENCE_LOCK:
+            results = await asyncio.to_thread(
+                _run_predict,
+                image_np,
+                conf_threshold,
+                iou_threshold,
+                image_size,
+            )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Inference failed: {exc}") from exc
 
@@ -358,10 +382,11 @@ async def predict(
 
 
 @app.post("/warmup", response_model=Dict[str, str])
-def warmup() -> Dict[str, str]:
+async def warmup() -> Dict[str, str]:
     """Run a dummy inference to reduce cold-start latency after deploy."""
     if MODEL is None:
         raise HTTPException(status_code=503, detail="Model is not loaded. Verify weights availability.")
     dummy = np.zeros((64, 64, 3), dtype=np.uint8)
-    MODEL.predict(dummy, conf=0.5, iou=0.5, imgsz=64, device=DEVICE, verbose=False)
+    async with INFERENCE_LOCK:
+        await asyncio.to_thread(_run_predict, dummy, 0.5, 0.5, 64)
     return {"status": "warmed"}
