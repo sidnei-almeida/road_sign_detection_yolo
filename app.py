@@ -90,7 +90,7 @@ MODEL: Optional[YOLO] = None
 MODEL_PATH: Optional[str] = None
 CLASS_NAMES: List[str] = []
 DEVICE: str = "cpu"
-DEFAULT_IMAGE_SIZE = int(os.getenv("DEFAULT_IMAGE_SIZE", "640"))
+DEFAULT_IMAGE_SIZE = int(os.getenv("DEFAULT_IMAGE_SIZE", "416"))
 INFERENCE_LOCK = asyncio.Semaphore(1)
 
 
@@ -166,6 +166,7 @@ def load_model() -> Tuple[Optional[YOLO], Optional[str]]:
 
     try:
         model = YOLO(weights_path)
+        model.fuse()
         return model, weights_path
     except Exception:
         return None, None
@@ -216,18 +217,26 @@ def _get_device() -> str:
     return "cpu"
 
 
+def _resolve_imgsz(image_np: np.ndarray, requested: int) -> int:
+    """Avoid upscaling tiny images to a large square — saves CPU on free-tier Spaces."""
+    max_side = max(int(image_np.shape[0]), int(image_np.shape[1]))
+    capped = min(requested, max_side)
+    return max(32, ((capped + 31) // 32) * 32)
+
+
 def _run_predict(
     image_np: np.ndarray,
     conf_threshold: float,
     iou_threshold: float,
     image_size: int,
 ) -> Any:
+    imgsz = _resolve_imgsz(image_np, image_size)
     with torch.inference_mode():
         return MODEL.predict(
             image_np,
             conf=conf_threshold,
             iou=iou_threshold,
-            imgsz=image_size,
+            imgsz=imgsz,
             device=DEVICE,
             verbose=False,
         )
@@ -243,6 +252,9 @@ async def lifespan(app: FastAPI):
         print("⚠️ YOLO weights not found. Set MODEL_URL or place weights under 'modelos/'.")
     else:
         print(f"✅ YOLO model loaded from {MODEL_PATH}")
+        dummy = np.zeros((64, 64, 3), dtype=np.uint8)
+        await asyncio.to_thread(_run_predict, dummy, 0.25, 0.5, 64)
+        print("✅ YOLO warmup complete")
     yield
     MODEL = None
 

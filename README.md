@@ -1,3 +1,15 @@
+---
+title: Road Sign Detection API
+emoji: 🚦
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+short_description: REST API for Brazilian road sign detection with YOLO
+---
+
 <p align="center">
   <img src="./images/header.png" alt="RoadSight — road sign intelligence powered by YOLO" width="920" />
 </p>
@@ -15,6 +27,7 @@
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/YOLO-Ultralytics-00FFFF?logo=yolo&logoColor=black" alt="YOLO" />
   <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Hugging%20Face-Spaces-yellow?logo=huggingface&logoColor=white" alt="Hugging Face Spaces" />
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" />
 </p>
 
@@ -50,7 +63,7 @@ flowchart LR
 1. **Data** — Dataset config in `dados/road_signs_dataset.yaml` (class list, train/val paths). Sample images under `dados/image_examples/` for smoke tests.
 2. **Training** — YOLO training artifacts land under `resultados/runs/detect/train/weights/` (e.g. `best.pt`). Notebooks in `notebooks/` cover EDA, preprocessing, and training (portfolio workflow).
 3. **Serving** — `app.py` loads weights from `modelos/best.pt`, training output paths, or **`MODEL_URL`** / GitHub raw fallbacks at startup.
-4. **Inference** — `MODEL.predict()` with tunable `conf_threshold`, `iou_threshold`, and `image_size` (default **768**). Device: **CUDA**, **MPS**, or **CPU**.
+4. **Inference** — `MODEL.predict()` with tunable `conf_threshold`, `iou_threshold`, and `image_size` (default **416**). Device: **CUDA**, **MPS**, or **CPU**.
 
 ---
 
@@ -65,6 +78,45 @@ Any client can call the API. The layout below illustrates a **RoadSight**-style 
 <p align="center">
   <sub>Example UI wired to <code>POST /predict</code> (optional <code>include_image=true</code> for annotated frames).</sub>
 </p>
+
+---
+
+## Deploy no Hugging Face Spaces
+
+Este repositório está configurado como **Docker Space**. O bloco YAML no topo deste `README.md` define `sdk: docker` e `app_port: 7860`.
+
+### Criar o Space
+
+1. Acesse [huggingface.co/new-space](https://huggingface.co/new-space).
+2. Escolha **Docker** como SDK e conecte este repositório GitHub (ou faça push direto para o Space).
+3. Garanta que `modelos/best.pt` esteja no repositório (ou use **Git LFS** para arquivos grandes).
+4. Opcional: em **Settings → Repository secrets**, defina **`MODEL_URL`** com uma URL HTTPS direta do `.pt` se os pesos não estiverem no build.
+5. Após o build, abra **`/docs`** para o Swagger UI ou chame **`POST /warmup`** para reduzir cold start.
+
+### Variáveis de ambiente no Space
+
+Configure em **Settings → Variables and secrets**:
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `MODEL_URL` | URL HTTPS para baixar `.pt` na inicialização | — |
+| `DEFAULT_IMAGE_SIZE` | Tamanho YOLO padrão em `/predict` | `416` |
+| `CORS_ORIGINS` | Origens CORS (vírgula) ou `*` | `*` |
+
+> **Nota:** PyTorch + YOLO consome bastante RAM. O tier **CPU basic** do Spaces costuma ser o mínimo viável; tiers menores podem falhar no boot.
+
+### Testar o Space publicado
+
+Substitua `SEU_USUARIO` e `SEU_SPACE` pela URL do seu Space:
+
+```bash
+curl https://SEU_USUARIO-SEU_SPACE.hf.space/health
+
+curl -X POST "https://SEU_USUARIO-SEU_SPACE.hf.space/predict?include_image=true" \
+  -F "file=@dados/image_examples/road0.jpg"
+```
+
+Documentação: [Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker).
 
 ---
 
@@ -112,7 +164,7 @@ Open **`http://127.0.0.1:8000/docs`** for interactive OpenAPI.
 | `file` | — | Image upload (PNG / JPG) |
 | `conf_threshold` | `0.25` | Minimum detection confidence |
 | `iou_threshold` | `0.5` | NMS IoU threshold |
-| `image_size` | `768` | YOLO inference size |
+| `image_size` | `416` | YOLO inference size |
 | `include_image` | `false` | If `true`, returns `annotated_image_base64` (PNG) |
 
 ### Example
@@ -158,47 +210,34 @@ Files under **`modelos/*.pt`** are intended for **Git LFS** (see `.gitattributes
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MODEL_URL` | HTTPS URL to download `.pt` weights at startup | — |
-| `PORT` | Uvicorn listen port | `8000` |
-| `DEFAULT_IMAGE_SIZE` | YOLO `imgsz` default for `/predict` | `640` |
+| `PORT` | Uvicorn listen port (`7860` no Docker/Spaces, `8000` local) | `8000` local / `7860` Docker |
+| `DEFAULT_IMAGE_SIZE` | YOLO `imgsz` default for `/predict` | `416` |
 | `CORS_ORIGINS` | Origens permitidas (vírgula) ou `*` | `*` |
 
 ---
 
-## Docker & Render
+## Docker (local ou HF Spaces)
 
-### Docker (local)
-
-- **`Dockerfile`**: Python 3.10 slim, OpenGL libs for OpenCV, installs `requirements.txt`, runs **`uvicorn app:app`** on **`PORT`** (default **8000**).
-- Set **`MODEL_URL`** or commit LFS weights under `modelos/`.
+- **`Dockerfile`**: Python 3.10 slim, OpenGL libs for OpenCV, PyTorch CPU, roda **`uvicorn app:app`** na porta **`7860`** (padrão HF Spaces).
+- Set **`MODEL_URL`** ou inclua os pesos em `modelos/`.
 
 ```bash
 docker build -t road-sign-api .
-docker run -p 8000:8000 -e MODEL_URL="https://..." road-sign-api
+docker run -p 7860:7860 -e MODEL_URL="https://..." road-sign-api
 ```
 
-### Deploy no Render
-
-1. Faça push deste repositório no GitHub.
-2. No [Render Dashboard](https://dashboard.render.com/), clique em **New → Blueprint** e conecte o repo (usa o `render.yaml` incluído).
-   - Ou crie manualmente: **New → Web Service → Docker**, apontando para este repo.
-3. Defina a variável **`MODEL_URL`** com a URL HTTPS direta do `.pt` (ex.: GitHub raw ou release asset) se os pesos não estiverem no build.
-4. Após o deploy, chame **`POST /warmup`** para aquecer o modelo e reduzir cold start.
-
-> **Nota:** PyTorch + YOLO consome bastante RAM. O plano **Starter** (512 MB+) costuma ser o mínimo viável; o free tier pode falhar no boot. Ajuste `plan` em `render.yaml` conforme sua conta.
-
-O health check do Render usa **`GET /health`** (configurado no blueprint).
+Abra **`http://localhost:7860/docs`** após subir o container.
 
 ---
 
 ## Project structure
 
 ```
-road_sign_detection_yolo/
+road_sign_detection_yl/
 ├── app.py                 # FastAPI + YOLO inference
-├── Dockerfile
+├── Dockerfile             # Hugging Face Spaces (Docker SDK)
 ├── requirements.txt
 ├── run_app.sh             # Local uvicorn launcher
-├── render.yaml            # Render Blueprint (Docker web service)
 ├── dados/
 │   ├── road_signs_dataset.yaml
 │   ├── road_signs_annotations.csv
