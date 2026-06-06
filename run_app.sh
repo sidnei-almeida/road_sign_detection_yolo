@@ -6,4 +6,5 @@ if [ -d "venv/bin" ]; then
 	source venv/bin/activate
 fi
 
-exec uvicorn app:app --host 0.0.0.0 --port 7860
+PORT="${PORT:-8000}"
+exec uvicorn app:app --host 0.0.0.0 --port "$PORT"

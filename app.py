@@ -359,9 +359,7 @@ async def predict(
 
 @app.post("/warmup", response_model=Dict[str, str])
 def warmup() -> Dict[str, str]:
-    """
-    Endpoint to warm up the model (useful for Hugging Face Spaces cold starts).
-    """
+    """Run a dummy inference to reduce cold-start latency after deploy."""
     if MODEL is None:
         raise HTTPException(status_code=503, detail="Model is not loaded. Verify weights availability.")
     dummy = np.zeros((64, 64, 3), dtype=np.uint8)

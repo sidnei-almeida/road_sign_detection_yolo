@@ -88,9 +88,9 @@ pip install -r requirements.txt
 bash run_app.sh
 ```
 
-API base URL: **`http://0.0.0.0:7860`** (override with env **`PORT`** in Docker).
+API base URL: **`http://0.0.0.0:8000`** (override com env **`PORT`**).
 
-Open **`http://127.0.0.1:7860/docs`** for interactive OpenAPI.
+Open **`http://127.0.0.1:8000/docs`** for interactive OpenAPI.
 
 ---
 
@@ -103,7 +103,7 @@ Open **`http://127.0.0.1:7860/docs`** for interactive OpenAPI.
 | GET | `/model/info` | Weights path, classes, device, Torch / Ultralytics versions |
 | GET | `/classes` | List of class names |
 | POST | `/predict` | Multipart image + query params (see below) |
-| POST | `/warmup` | Dummy inference to reduce cold-start latency (Spaces) |
+| POST | `/warmup` | Inferência dummy para reduzir latência após cold start |
 
 ### `POST /predict` parameters
 
@@ -118,7 +118,7 @@ Open **`http://127.0.0.1:7860/docs`** for interactive OpenAPI.
 ### Example
 
 ```bash
-curl -X POST "http://localhost:7860/predict?include_image=true" \
+curl -X POST "http://localhost:8000/predict?include_image=true" \
   -F "file=@dados/image_examples/road0.jpg"
 ```
 
@@ -158,15 +158,33 @@ Files under **`modelos/*.pt`** are intended for **Git LFS** (see `.gitattributes
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MODEL_URL` | HTTPS URL to download `.pt` weights at startup | — |
-| `PORT` | Uvicorn listen port (Docker exposes **7860**) | `7860` |
+| `PORT` | Uvicorn listen port | `8000` |
 
 ---
 
-## Docker & Hugging Face Spaces
+## Docker & Render
 
-- **`Dockerfile`**: Python 3.10 slim, OpenGL libs for OpenCV, installs `requirements.txt`, runs **`uvicorn app:app`** on port **7860**.
-- Push the repo to a **Docker** Space; set **`MODEL_URL`** or commit LFS weights.
-- Call **`POST /warmup`** after deploy to warm the model.
+### Docker (local)
+
+- **`Dockerfile`**: Python 3.10 slim, OpenGL libs for OpenCV, installs `requirements.txt`, runs **`uvicorn app:app`** on **`PORT`** (default **8000**).
+- Set **`MODEL_URL`** or commit LFS weights under `modelos/`.
+
+```bash
+docker build -t road-sign-api .
+docker run -p 8000:8000 -e MODEL_URL="https://..." road-sign-api
+```
+
+### Deploy no Render
+
+1. Faça push deste repositório no GitHub.
+2. No [Render Dashboard](https://dashboard.render.com/), clique em **New → Blueprint** e conecte o repo (usa o `render.yaml` incluído).
+   - Ou crie manualmente: **New → Web Service → Docker**, apontando para este repo.
+3. Defina a variável **`MODEL_URL`** com a URL HTTPS direta do `.pt` (ex.: GitHub raw ou release asset) se os pesos não estiverem no build.
+4. Após o deploy, chame **`POST /warmup`** para aquecer o modelo e reduzir cold start.
+
+> **Nota:** PyTorch + YOLO consome bastante RAM. O plano **Starter** (512 MB+) costuma ser o mínimo viável; o free tier pode falhar no boot. Ajuste `plan` em `render.yaml` conforme sua conta.
+
+O health check do Render usa **`GET /health`** (configurado no blueprint).
 
 ---
 
@@ -178,6 +196,7 @@ road_sign_detection_yolo/
 ├── Dockerfile
 ├── requirements.txt
 ├── run_app.sh             # Local uvicorn launcher
+├── render.yaml            # Render Blueprint (Docker web service)
 ├── dados/
 │   ├── road_signs_dataset.yaml
 │   ├── road_signs_annotations.csv
@@ -196,9 +215,9 @@ road_sign_detection_yolo/
 ## Testing
 
 ```bash
-curl http://localhost:7860/health
+curl http://localhost:8000/health
 
-curl -X POST "http://localhost:7860/predict" \
+curl -X POST "http://localhost:8000/predict" \
   -F "file=@dados/image_examples/road0.jpg"
 ```
 
